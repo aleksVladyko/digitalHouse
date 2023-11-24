@@ -7,54 +7,33 @@ function App() {
 
         if (form) {
             form.addEventListener("submit", function (event) {
-                event.preventDefault(); // Предотвращаем отправку формы по умолчанию
+                event.preventDefault();
 
-                // Получаем значения полей формы
-                const nameInput = document.getElementById("name");
-                const phoneInput = document.getElementById("phone");
-                const emailInput = document.getElementById("email");
-                const messageTextarea = document.getElementById("message");
+                const formData = new FormData(form);
 
-                const name = nameInput.value;
-                const phone = phoneInput.value;
-                const email = emailInput.value;
-                const message = messageTextarea.value;
-                console.log(message);
                 // Производим валидацию полей
                 let isValid = true;
 
-                if (name.trim() === "") {
+                if (
+                    formData.get("name").trim() === "" ||
+                    formData.get("phone").trim() === ""
+                ) {
                     isValid = false;
-                    nameInput.classList.add("error");
+                    form.name.classList.add("error");
                 } else {
-                    nameInput.classList.remove("error");
+                    form.name.classList.remove("error");
                 }
 
-                if (phone.trim() === "") {
-                    isValid = false;
-                    phoneInput.classList.add("error");
-                } else {
-                    phoneInput.classList.remove("error");
-                }
-                // валидность так же можно проверить в разметке input
-                if (email.trim() !== "") {
+                // Валидация email (если нужно)
+                if (formData.get("email").trim() !== "") {
                     var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailPattern.test(email)) {
+                    if (!emailPattern.test(formData.get("email"))) {
                         isValid = false;
-                        emailInput.classList.add("error");
+                        form.email.classList.add("error");
                     } else {
-                        emailInput.classList.remove("error");
+                        form.email.classList.remove("error");
                     }
                 }
-
-                // Дополнительная валидация для формата телефона
-                // var phonePattern = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
-                // if (!phonePattern.test(phone)) {
-                //     isValid = false;
-                //     phoneInput.classList.add("error");
-                // } else {
-                //     phoneInput.classList.remove("error");
-                // }
 
                 // Проверяем общую валидность формы
                 if (isValid) {
@@ -63,23 +42,19 @@ function App() {
                         // headers: {
                         //     "Content-Type": "application/json",
                         // },
-                        body: JSON.stringify({
-                            name: name,
-                            phone: phone,
-                            email: email,
-                            message: message,
-                        }),
+                        body: formData,
                     })
                         .then((response) => {
                             if (response.ok) {
                                 // Успешная отправка формы
                                 alert("Форма успешно отправлена!");
-                                console.log("Имя:", name);
-                                console.log("Телефон:", phone);
-                                console.log("Email:", email);
-                                console.log("Сообщение:", message);
-
-                                // Получаем и выводим ответ
+                                console.log("Имя:", formData.get("name"));
+                                console.log("Телефон:", formData.get("phone"));
+                                console.log("Email:", formData.get("email"));
+                                console.log(
+                                    "Сообщение:",
+                                    formData.get("message")
+                                );
                                 return response.json();
                             } else {
                                 throw new Error(
@@ -96,15 +71,11 @@ function App() {
                         });
 
                     // Сбрасываем значения полей
-                    nameInput.value = "";
-                    phoneInput.value = "";
-                    emailInput.value = "";
-                    messageTextarea.value = "";
+                    form.reset();
                 }
             });
         }
     }, []);
-
     return (
         <>
             <section className="wrapper">
@@ -154,6 +125,7 @@ function App() {
                                     placeholder="Введите текст"
                                     id="message"
                                     name="message"
+                                    maxLength={100}
                                 />
                             </fieldset>
                         </div>
